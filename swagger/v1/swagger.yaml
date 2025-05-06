@@ -2,15 +2,17 @@ openapi: 3.0.1
 info:
   title: Simple Drive API
   description: |
-    Simple Drive is a REST API for storing and retrieving binary data (blobs) with multiple storage backend options.
+    Simple Drive is a REST API for storing and retrieving binary data (blobs) with multiple storage backend options including File System, Database, Amazon S3, and FTP.
     
     ## Authentication
-    All API endpoints require Bearer token authentication except for the health endpoint.
+    All API endpoints require JWT Bearer token authentication except for the health endpoint and token generation.
     
-    Example: `Authorization: Bearer test-token-1234567890`
+    Example: `Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...`
+    
+    A token can be obtained via the `/api/v1/tokens` endpoint.
   version: v1
   contact:
-    name: API Support
+    name: Abdulsalam
 servers:
   - url: http://localhost:3000
     description: Local development server
@@ -80,7 +82,8 @@ paths:
                     example: Token generated successfully
                   token:
                     type: string
-                    example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzaW1wbGVfZHJpdmVfYXBpIiwiaWF0IjoxNjgyMTAyNDU4LCJleHAiOjE2ODIxODg4NTh9.7cRYvVyjsoRbwCvB6-dvSxFAR0ZF
+                    description: JWT token to be used for authentication
+                    example: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidGVzdHVzZXIiLCJzY29wZSI6ImRlZmF1bHQiLCJjbGllbnRfaW5mbyI6Ik1vemlsbGEvNS4wIiwiaWF0IjoxNjE1MjM0MjY3LCJleHAiOjE2MTUzMjA2Njd9.pU8-XU4iNy9ZF4eG6TMUBK84xx2p-X3W
         '401':
           description: Invalid credentials
           content:
@@ -94,10 +97,64 @@ paths:
                   message:
                     type: string
                     example: Invalid credentials
+  /api/v1/blobs/{id}:
+    get:
+      summary: Retrieve a blob
+      description: Retrieve a blob with the given ID
+      tags:
+        - Blobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the blob to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blob retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: my-unique-blob-id
+                  data:
+                    type: string
+                    description: Base64-encoded content of the blob
+                    example: SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=
+                  size:
+                    type: integer
+                    description: Size of the blob in bytes
+                    example: 1024
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2025-05-06T00:00:00.000Z'
+        '404':
+          description: Blob not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Blob not found
+                  error_code:
+                    type: string
+                    example: storage.not_found
   /api/v1/blobs:
     post:
       summary: Store a blob
-      description: Store a blob with the given ID and content
+      description: Store a blob with the given ID and base64-encoded data
       tags:
         - Blobs
       security:
@@ -109,11 +166,12 @@ paths:
             schema:
               type: object
               required:
-                - content
+                - blob_id
+                - data
               properties:
                 blob_id:
                   type: string
-                  description: Unique identifier for the blob (will be auto-generated if not provided)
+                  description: Unique identifier for the blob
                   example: my-unique-blob-id
                 data:
                   type: string
@@ -127,12 +185,36 @@ paths:
               schema:
                 type: object
                 properties:
-                  blob_id:
+                  id:
                     type: string
                     example: my-unique-blob-id
                   size:
                     type: integer
+                    description: Size of the blob in bytes
                     example: 1024
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2025-05-06T00:00:00.000Z'
+                  storage_provider:
+                    type: string
+                    example: 's3'
+        '422':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Missing required parameters
+                  details:
+                    type: string
+                    example: Both blob_id and data are required
                   created_at:
                     type: string
                     format: date-time

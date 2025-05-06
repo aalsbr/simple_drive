@@ -118,71 +118,115 @@ The API will be available at http://localhost:3000
 
 ## Configuration
 
-### Storage Backend Configuration
+### Environment Configuration
 
-Simple Drive supports multiple storage backends that can be configured through environment variables. Set the main storage type using:
+Simple Drive uses a `.env` file for all configuration settings. Below is a sample configuration with all available options:
 
 ```bash
-STORAGE_BACKEND=<type>  # One of: file, database, s3, ftp
+# Simple Drive Environment Configuration
+
+# JWT Authentication
+JWT_SECRET=your-secure-secret-key
+
+# Storage backend: 'file', 'database', 's3', or 'ftp'
+STORAGE_BACKEND=s3
+
+# Local File Storage Configuration (only needed if STORAGE_BACKEND=file)
+STORAGE_PATH=/path/to/storage/directory
+
+# S3 Storage Configuration (only needed if STORAGE_BACKEND=s3)
+S3_BUCKET_NAME=your-bucket-name
+AWS_REGION=your-aws-region
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+
+# FTP Storage Configuration (only needed if STORAGE_BACKEND=ftp) 
+FTP_HOST=your-ftp-host
+FTP_USERNAME=your-username
+FTP_PASSWORD=your-password
+FTP_DIRECTORY=/remote/directory
+FTP_PORT=21
+FTP_PASSIVE=true
+
+# MySQL Database Configuration
+DB_USERNAME=your-db-username
+DB_PASSWORD=your-db-password
+DB_HOST=your-db-host
+DB_PORT=3306
+DB_NAME=your-db-name
 ```
 
-<details>
-<summary><strong>📁 File System Storage (Default)</strong></summary>
+### Storage Backends
+
+<details open>
+<summary><strong>📁 File System Storage</strong></summary>
+
+To use local file system storage:
 
 ```bash
 STORAGE_BACKEND=file
-STORAGE_PATH=/path/to/storage  # Optional, defaults to tmp/storage
+STORAGE_PATH=/path/to/storage/directory
 ```
 
-Blobs will be stored in the local filesystem. This is the simplest option and works well for development and testing.
+This option stores files directly on your server's file system.
 </details>
 
 <details>
 <summary><strong>💾 Database Storage</strong></summary>
 
+To store blobs in your MySQL database:
+
 ```bash
 STORAGE_BACKEND=database  # or db
 ```
 
-Blobs will be stored directly in the PostgreSQL database in the `blob_binary_storages` table. Good for small files when you want to keep everything in one place.
+With this option, blob content is stored directly in the database table `blob_binary_storages`.
 </details>
 
 <details>
 <summary><strong>☁️ Amazon S3 Storage</strong></summary>
 
+For Amazon S3 or compatible services:
+
 ```bash
 STORAGE_BACKEND=s3
-S3_BUCKET_NAME=your-bucket-name
-AWS_REGION=us-east-1            # Optional, defaults to us-east-1
-AWS_ACCESS_KEY_ID=your-key-id
+S3_BUCKET_NAME=simple-drive-uploads
+AWS_REGION=eu-north-1
+AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_ENDPOINT=custom-endpoint    # Optional, for S3-compatible services
 ```
 
-Stores blobs in Amazon S3 or any S3-compatible service like MinIO or DigitalOcean Spaces.
+This is recommended for production deployments for better scalability.
 </details>
 
 <details>
 <summary><strong>📡 FTP Storage</strong></summary>
 
+For using an FTP server as storage backend:
+
 ```bash
 STORAGE_BACKEND=ftp
-FTP_HOST=ftp.example.com
-FTP_USER=username
-FTP_PASSWORD=password
-FTP_DIRECTORY=/remote/path     # Remote directory to store files
-FTP_PASSIVE=true              # Optional, use passive mode
-FTP_PORT=21                   # Optional, defaults to 21
+FTP_HOST=your-ftp-host
+FTP_USERNAME=your-username
+FTP_PASSWORD=your-password
+FTP_DIRECTORY=/ftpfiles
+FTP_PORT=21
+FTP_PASSIVE=true
 ```
 
-Stores blobs on a remote FTP server. Useful for integrating with legacy systems.
+This option is useful for integrating with existing FTP-based systems.
 </details>
 
-### Authentication Configuration
+### Database Configuration
+
+Simple Drive uses MySQL as its database:
 
 ```bash
-JWT_SECRET=your-secure-secret-key  # Required for token generation/validation
-JWT_EXPIRATION=30                 # Optional: token expiration in days, default: 30
+DB_USERNAME=root
+DB_PASSWORD=your-db-password
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=simple_drive_development
 ```
 
 ## API Usage
@@ -237,8 +281,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 Content-Type: application/json
 
 {
-  "blob_id": "my-unique-blob-id",  // Optional, auto-generated UUID if omitted
-  "content": "base64-encoded-content"
+  "blob_id": "my-unique-blob-id",
+  "data": "base64-encoded-content"
 }
 ```
 
@@ -249,10 +293,23 @@ HTTP/1.1 201 Created
 Content-Type: application/json
 
 {
-  "blob_id": "my-unique-blob-id",
+  "id": "my-unique-blob-id",
   "size": 1024,
   "created_at": "2025-05-06T00:00:00.000Z",
-  "storage_provider": "file"
+  "storage_provider": "s3"
+}
+```
+
+#### Error Response (Missing Parameters)
+
+```http
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/json
+
+{
+  "success": false,
+  "message": "Missing required parameters",
+  "details": "Both blob_id and data are required"
 }
 ```
 </details>
@@ -272,11 +329,23 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "blob_id": "my-unique-blob-id",
+  "id": "my-unique-blob-id",
+  "data": "base64-encoded-content",
   "size": 1024,
-  "content": "base64-encoded-content",
-  "created_at": "2025-05-06T00:00:00.000Z",
-  "storage_provider": "file"
+  "created_at": "2025-05-06T00:00:00.000Z"
+}
+```
+
+#### Error Response (Blob Not Found)
+
+```http
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "success": false,
+  "message": "Blob not found",
+  "error_code": "storage.not_found"
 }
 ```
 </details>
@@ -388,15 +457,7 @@ simple_drive/
 - **Services**: `TokenService`, `Storage::BaseStorage` and implementations
 - **Configuration**: `.env` for environment variables (not in version control)
 
-## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
@@ -405,10 +466,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <p>Built with ❤️ by Your Name</p>
-  <p>
-    <a href="https://github.com/yourusername">GitHub</a> •
-    <a href="https://twitter.com/yourusername">Twitter</a>
-  </p>
+  <p>Built with ❤️ by Abdulsalam</p>
+
 </div>
 
