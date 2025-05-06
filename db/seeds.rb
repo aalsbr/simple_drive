@@ -11,19 +11,37 @@
 # Create a seed token for testing
 # The token will be shown in the console output when running db:seed
 
-# Generate a predictable token for development/testing purposes
+# Generate a proper JWT token for development/testing purposes
+require 'jwt'
+
+jwt_secret = ENV['JWT_SECRET'] || 'development-jwt-secret-key'
+
 if Rails.env.development? || Rails.env.test?
-  token_value = 'test-token-1234567890'
-  token_description = 'Development/Test token'
+  # Create a predictable payload for testing
+  payload = {
+    sub: 'test-user-id',
+    name: 'Test User',
+    admin: true,
+    iat: Time.now.to_i,
+    exp: 30.days.from_now.to_i
+  }
+  token_description = 'Development/Test JWT token'
 else
-  # Use a secure random token in production
-  token_value = SecureRandom.base64(32)
-  token_description = 'Production seed token'
+  # Create a more secure payload for production
+  payload = {
+    sub: SecureRandom.uuid,
+    iat: Time.now.to_i,
+    exp: 7.days.from_now.to_i
+  }
+  token_description = 'Production JWT token'
 end
 
+# Generate the JWT token
+token_value = JWT.encode(payload, jwt_secret, 'HS256')
+
 # Create or find the token (to avoid duplicates on multiple seed runs)
-auth_token = AuthToken.find_or_create_by(token: token_value) do |token|
-  token.description = token_description
+auth_token = AuthToken.find_or_create_by(description: token_description) do |token|
+  token.token = token_value
 end
 
 # Output token information

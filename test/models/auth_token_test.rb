@@ -7,9 +7,15 @@ class AuthTokenTest < ActiveSupport::TestCase
   end
   
   test "should require token" do
+    # Skip callbacks to prevent auto-generation
+    AuthToken.skip_callback(:validation, :before, :generate_token)
+    
     auth_token = AuthToken.new(description: 'Test token')
     assert_not auth_token.valid?
     assert_includes auth_token.errors[:token], "can't be blank"
+    
+    # Set the callback back
+    AuthToken.set_callback(:validation, :before, :generate_token, if: -> { token.blank? })
   end
   
   test "should validate presence of description" do

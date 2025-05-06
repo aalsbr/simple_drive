@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+binary_one:
+  blob_id: binary-test-blob-1
+  content: VGhpcyBpcyBhIHRlc3QgY29udGVudCBmb3IgYmxvYiAxLg==
+
+binary_two:
+  blob_id: binary-test-blob-2
+  content: VGhpcyBpcyBhIHRlc3QgY29udGVudCBmb3IgYmxvYiAyLg==

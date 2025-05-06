@@ -1,10 +1,10 @@
 class AuthToken < ApplicationRecord
+  # Generate a secure random token if none provided
+  before_validation :generate_token, on: :create, if: -> { token.blank? }
+  
   # Validations
   validates :token, presence: true, uniqueness: true
   validates :description, presence: true
-  
-  # Generate a secure random token if none provided
-  before_validation :generate_token, on: :create, if: -> { token.blank? }
   
   private
   

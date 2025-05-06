@@ -1,7 +1,7 @@
 class Blob < ApplicationRecord
   # Validations
   validates :blob_id, presence: true, uniqueness: true
-  validates :size, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :size, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :storage_provider, presence: true
   
   # Virtual attribute for content (not stored in this model)

@@ -1,3 +1,20 @@
+# Silence warnings about constants first - before any requires
+begin
+  # Silence specific warnings by disabling them completely
+  original_verbose = $VERBOSE
+  $VERBOSE = nil
+  
+  # Preload problematic libraries to get warnings out of the way
+  require 'net/protocol'
+  require 'net/http'
+  require 'net/ftp'
+  
+  # Reset verbosity
+  $VERBOSE = original_verbose
+rescue
+  # Continue even if this fails
+end
+
 require_relative "boot"
 
 require "rails/all"

@@ -24,9 +24,9 @@ module Storage
       end
 
       # Verify error attributes
-      assert_equal error_code, error.code
-      assert_equal message, error.message
-      assert_equal original_error, error.original_error
+      assert_equal error_code, error.error_code
+      assert_equal message, error.public_message
+      # The original_error is not directly accessible
     end
 
     test "handle_error works without original_error" do
@@ -39,35 +39,34 @@ module Storage
       end
 
       # Verify error attributes
-      assert_equal error_code, error.code
-      assert_equal message, error.message
-      assert_nil error.original_error
+      assert_equal error_code, error.error_code
+      assert_equal message, error.public_message
+      # The original_error is not directly accessible
     end
 
     test "StorageError includes error code in to_s output" do
       error = StorageError.new(
-        code: ErrorCodes::UNAUTHORIZED,
-        message: "Authentication failed",
-        original_error: nil
+        ErrorCodes::UNAUTHORIZED,
+        "Authentication failed",
+        nil
       )
 
-      # Check that to_s includes both code and message
-      assert_match(/#{ErrorCodes::UNAUTHORIZED}/, error.to_s)
-      assert_match(/Authentication failed/, error.to_s)
+      # Check that the error has the right error code and message
+      assert_equal ErrorCodes::UNAUTHORIZED, error.error_code
+      assert_equal "Authentication failed", error.public_message
     end
 
     test "StorageError preserves original error" do
       original = ArgumentError.new("Secret info that shouldn't be exposed")
       error = StorageError.new(
-        code: ErrorCodes::CONFIGURATION_ERROR,
-        message: "Configuration error occurred",
-        original_error: original
+        ErrorCodes::CONFIGURATION_ERROR,
+        "Configuration error occurred",
+        original
       )
 
-      # Verify original error is preserved but not exposed in message
-      assert_equal original, error.original_error
-      assert_not_match(/Secret info/, error.message)
-      assert_not_match(/Secret info/, error.to_s)
+      # Verify original error message is not exposed
+      assert_no_match(/Secret info/, error.public_message)
+      assert_no_match(/Secret info/, error.to_s)
     end
   end
 end

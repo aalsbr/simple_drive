@@ -6,7 +6,7 @@ Rswag::Ui.configure do |c|
   # NOTE: If you're using rspec-api to expose Swagger files (under swagger_root) as JSON or YAML endpoints,
   # then the list below should correspond to the relative paths for those endpoints
 
-  c.swagger_endpoint '/api-docs/v1/swagger.yaml', 'Simple Drive API V1'
+  c.openapi_endpoint '/api-docs/v1/swagger.yaml', 'Simple Drive API V1'
 
   # Simple configuration without OAuth
   # This app uses Bearer token authentication instead

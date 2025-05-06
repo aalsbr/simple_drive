@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+# This file loads Spring without loading other gems
+# for speed.
+
+# Silence warnings before anything else
+begin
+  # Silence specific warnings about constant redefinition
+  begin
+    verbose = $VERBOSE
+    $VERBOSE = nil
+    
+    # Pre-load libraries that cause warnings
+    require 'net/protocol'
+    require 'net/http'
+    require 'net/ftp'
+    
+    $VERBOSE = verbose
+  rescue
+    # Continue even if this fails
+  end
+end
+
+require 'bundler'
+
+module Spring
+  def self.loaded_via_spring?
+    @loaded_via_spring
+  end
+  
+  def self.loaded_via_spring=(loaded)
+    @loaded_via_spring = loaded
+  end
+  
+  class Loader
+    def initialize(args)
+      @args = args
+    end
+    
+    def load_application
+      require 'spring/application'
+      Spring::Application.new.load
+    end
+    
+    def load_spring_gem
+      begin
+        gem 'spring'
+        require 'spring/boot'
+      rescue LoadError => e
+        raise e unless e.message.include?('spring')
+      end
+    end
+    
+    def run
+      load_spring_gem
+      load_application
+      exec(*@args)
+    end
+  end
+  
+  Spring.loaded_via_spring = true
+  
+  if ARGV.first == 'rails:generate'
+    ARGV.shift
+    ARGV.unshift 'generate'
+  end
+  
+  Loader.new(ARGV).run
+end

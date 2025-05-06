@@ -41,6 +41,14 @@ gem "dotenv-rails", groups: [:development, :test, :production]
 # Use JWT for token-based authentication
 gem "jwt", "~> 2.7"
 
+# Fix warnings about doubly-defined constants in net/protocol
+gem "net-protocol", "~> 0.2.1"
+gem "net-ftp", "~> 0.2.0"
+gem "net-http", "~> 0.3.0"
+
+# Used for warning suppression
+gem "warning", "~> 1.3"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
@@ -56,3 +64,5 @@ group :development do
   # gem "spring"
 end
 
+
+gem "mocha", "~> 2.7", :group => :test

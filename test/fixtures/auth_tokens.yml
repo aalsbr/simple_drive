@@ -1,9 +1,9 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  token: MyString
-  description: MyString
+test_token:
+  token: test-token-1234567890
+  description: Test authentication token
 
-two:
-  token: MyString
-  description: MyString
+dev_token:
+  token: dev-token-0987654321
+  description: Development authentication token

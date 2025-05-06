@@ -21,12 +21,8 @@ module Storage
       @public_message = public_message
       @original_error = original_error
       
-      # Determine the full message for logging (not user-facing)
-      full_message = if original_error
-                       "#{public_message} - #{sanitize_message(original_error.message)}"
-                     else
-                       public_message
-                     end
+      # Keep only the public message for user-facing errors
+      full_message = public_message
       
       # Pass the sanitized message to the parent class
       super(sanitize_message(full_message))
