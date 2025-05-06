@@ -1,0 +1,229 @@
+openapi: 3.0.1
+info:
+  title: Simple Drive API
+  description: |
+    Simple Drive is a REST API for storing and retrieving binary data (blobs) with multiple storage backend options.
+    
+    ## Authentication
+    All API endpoints require Bearer token authentication except for the health endpoint.
+    
+    Example: `Authorization: Bearer test-token-1234567890`
+  version: v1
+  contact:
+    name: API Support
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the current status of the API and server timestamp
+      tags:
+        - Health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-05T21:24:29.480Z'
+  /api/v1/tokens:
+    post:
+      summary: Generate JWT token
+      description: Generate a JWT authentication token for API access
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: User identifier
+                  example: testuser
+                password:
+                  type: string
+                  description: User password
+                  example: password
+                scope:
+                  type: string
+                  description: Optional scope for the token
+                  example: storage:read
+      responses:
+        '201':
+          description: Token generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Token generated successfully
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzaW1wbGVfZHJpdmVfYXBpIiwiaWF0IjoxNjgyMTAyNDU4LCJleHAiOjE2ODIxODg4NTh9.7cRYvVyjsoRbwCvB6-dvSxFAR0ZF
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid credentials
+  /api/v1/blobs:
+    post:
+      summary: Store a blob
+      description: Store a blob with the given ID and content
+      tags:
+        - Blobs
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                blob_id:
+                  type: string
+                  description: Unique identifier for the blob (will be auto-generated if not provided)
+                  example: my-unique-blob-id
+                data:
+                  type: string
+                  description: Base64-encoded content of the blob
+                  example: SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=
+      responses:
+        '201':
+          description: Blob created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blob_id:
+                    type: string
+                    example: my-unique-blob-id
+                  size:
+                    type: integer
+                    example: 1024
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2025-05-05T21:24:29.567Z'
+                  backend:
+                    type: string
+                    example: file
+        '400':
+          description: Bad request - invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: content must be base64 encoded
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication required
+  /api/v1/blobs/{id}:
+    get:
+      summary: Retrieve a blob
+      description: Retrieve a blob by its ID
+      tags:
+        - Blobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique blob ID
+          example: my-unique-blob-id
+      responses:
+        '200':
+          description: Blob retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blob_id:
+                    type: string
+                    example: my-unique-blob-id
+                  size:
+                    type: integer
+                    example: 1024
+                  content:
+                    type: string
+                    description: Base64-encoded content
+                    example: SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2025-05-05T21:24:29.567Z'
+                  backend:
+                    type: string
+                    example: file
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication required
+        '404':
+          description: Blob not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Blob not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

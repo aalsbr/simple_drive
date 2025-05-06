@@ -1,0 +1,79 @@
+# Files in the config/locales directory are used for internationalization and
+# are automatically loaded by Rails. If you want to use locales other than
+# English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t "hello"
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t("hello") %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# To learn more about the API, please read the Rails Internationalization guide
+# at https://guides.rubyonrails.org/i18n.html.
+#
+# Be aware that YAML interprets the following case-insensitive strings as
+# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
+# must be quoted to be interpreted as strings. For example:
+#
+#     en:
+#       "yes": yup
+#       enabled: "ON"
+
+en:
+  hello: "Hello world"
+  
+  blobs:
+    success:
+      created: "Blob created successfully"
+      retrieved: "Blob retrieved successfully"
+    errors:
+      not_found: "Blob not found"
+      content_not_found: "Blob content not found in storage"
+      failed_to_create: "Failed to create blob"
+      invalid_content: "Invalid blob content"
+      missing_parameters: "Missing required parameters"
+      missing_parameters_details: "Both blob_id and content parameters are required"
+      already_exists: "A blob with this ID already exists. Please use a unique ID."
+  
+  auth:
+    errors:
+      unauthorized: "Unauthorized"
+      unauthorized_details: "Invalid or missing authentication token"
+  
+  tokens:
+    success:
+      generated: "Token generated successfully"
+    errors:
+      invalid_credentials: "Invalid credentials"
+  
+  validation:
+    errors:
+      required: "%{field} is required"
+      invalid_base64: "Content must be base64 encoded"
+      invalid_padding: "Invalid base64 padding"
+      size_exceeds: "Decoded content size exceeds maximum allowed size of %{max_size} bytes"
+      size_exceeds_actual: "Decoded content size (%{actual_size} bytes) exceeds maximum allowed size of %{max_size} bytes"
+      empty_not_allowed: "Empty content is not allowed"
+      extension_not_allowed: "File extension '%{extension}' is not allowed. Allowed extensions: %{allowed}"
+      file_type_not_allowed: "File type '%{type}' is not allowed. Allowed types: %{allowed}"
+  
+  storage:
+    errors:
+      unauthorized: "Authorization failed during storage operation"
+      unauthorized_s3: "Authorization failed while accessing S3"
+      unauthorized_ftp: "Authorization failed while accessing FTP server"
+      not_found: "Resource not found in storage"
+      not_found_s3: "S3 bucket or path not found"
+      not_found_ftp: "FTP path not found"
+      upload_failed: "Failed to upload to storage service"
+      download_failed: "Failed to download from storage service"
+      connection_error: "Could not connect to %{provider} storage service"
+      unknown_error: "An unexpected error occurred during the storage operation"
