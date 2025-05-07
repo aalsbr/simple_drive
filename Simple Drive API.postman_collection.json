@@ -1,0 +1,527 @@
+{
+	"info": {
+		"_postman_id": "054e76d8-065b-40c4-a0d8-9299cc2ed7fd",
+		"name": "Simple Drive API",
+		"description": "Simple Drive is a REST API for storing and retrieving binary data (blobs) with multiple storage backend options including File System, Database, Amazon S3, and FTP.\n\n## Authentication\nAll API endpoints require JWT Bearer token authentication except for the health endpoint and token generation.\n\nExample: `Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...`\n\nA token can be obtained via the `/api/v1/tokens` endpoint.\n\n\nContact Support:\n Name: Abdulsalam",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "api/v1",
+			"item": [
+				{
+					"name": "blobs",
+					"item": [
+						{
+							"name": "Store a blob",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "<Bearer Token>",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"blob_id\": \"my-unique-blob-id\",\n    \"data\": \"SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/blobs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"blobs"
+									]
+								},
+								"description": "Store a blob with the given ID and base64-encoded data"
+							},
+							"response": [
+								{
+									"name": "Blob created successfully",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"blob_id\": \"my-unique-blob-id\",\n    \"data\": \"SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"success\": true,\n \"message\": \"Blob created successfully\",\n \"data\": {\n  \"id\": \"my-unique-blob-id23232\",\n  \"data\": null,\n  \"size\": 44,\n  \"created_at\": \"2025-05-07T00:52:22.306Z\"\n }\n}"
+								},
+								{
+									"name": "Bad request - invalid parameters",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"blob_id\": \"my-unique-blob-id\",\n    \"data\": \"SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"success\": false,\n \"message\": \"Content must be base64 encoded\",\n \"error_code\": \"blobs.invalid_format\"\n}"
+								},
+								{
+									"name": "Unauthorized - invalid or missing token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"blob_id\": \"my-unique-blob-id\",\n    \"data\": \"SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"success\": false,\n \"message\": \"Unauthorized\",\n \"error_code\": \"auth.unauthorized\"\n}"
+								},
+								{
+									"name": "Invalid parameters",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"blob_id\": \"my-unique-blob-id\",\n    \"data\": \"SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs"
+											]
+										}
+									},
+									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+									"code": 422,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"success\": false,\n \"message\": \"Missing required parameters\",\n \"error_code\": \"blobs.missing_parameters\",\n \"details\": \"Both blob_id and data are required\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Retrieve a blob",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "<Bearer Token>",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/blobs/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"blobs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "my-unique-blob-id",
+											"description": "(Required) The unique blob ID"
+										}
+									]
+								},
+								"description": "Retrieve a blob by its ID"
+							},
+							"response": [
+								{
+									"name": "Blob retrieved successfully",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"id\": \"my-unique-blob-id5551221\",\n \"data\": \"SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=\",\n \"size\": 44,\n \"created_at\": \"2025-05-07T00:39:54.829Z\"\n}"
+								},
+								{
+									"name": "Unauthorized - invalid or missing token",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"success\": false,\n \"message\": \"Unauthorized\",\n \"error_code\": \"auth.unauthorized\"\n}"
+								},
+								{
+									"name": "Blob not found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"description": "Added as a part of security scheme: bearer",
+												"key": "Authorization",
+												"value": "Bearer <token>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/v1/blobs/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"blobs",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"success\": false,\n \"message\": \"Blob not found\",\n \"error_code\": \"blobs.not_found\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Generate JWT token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password\",\n    \"scope\": \"storage:read\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tokens",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tokens"
+							]
+						},
+						"description": "Generate a JWT authentication token for API access"
+					},
+					"response": [
+						{
+							"name": "Token generated successfully",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password\",\n    \"scope\": \"storage:read\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tokens",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tokens"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"success\": true,\n \"message\": \"Token generated successfully\",\n \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidGVzdHVzZXIiLCJzY29wZSI6ImRlZmF1bHQiLCJjbGllbnRfaW5mbyI6Ik1vemlsbGEvNS4wIiwiaWF0IjoxNzE0OTQzMDAwLCJleHAiOjE3MTUwMjk0MDB9.FZT9Y4m7_5N3RrWe6QS07Q-3X_2AjT3xtWryJ-Lqcko\"\n}"
+						},
+						{
+							"name": "Invalid credentials",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password\",\n    \"scope\": \"storage:read\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/tokens",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tokens"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"success\": false,\n \"message\": \"Invalid credentials\",\n \"error_code\": \"auth.invalid_credentials\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Health check endpoint",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Returns the current status of the API and server timestamp"
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n \"status\": \"ok\",\n \"timestamp\": \"2025-05-07T03:45:00.000Z\"\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

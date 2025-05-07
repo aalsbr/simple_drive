@@ -14,7 +14,11 @@ class ApplicationController < ActionController::API
     
     # If no Authorization header, return 401 Unauthorized
     unless auth_header && auth_header.start_with?('Bearer ')
-      return render json: { error: I18n.t('auth.errors.unauthorized') }, status: :unauthorized
+      return render json: { 
+        success: false, 
+        message: I18n.t('auth.errors.unauthorized'),
+        error_code: 'auth.unauthorized'
+      }, status: :unauthorized
     end
     
     # Extract the token from the header
@@ -25,7 +29,11 @@ class ApplicationController < ActionController::API
     
     # If token invalid or expired, return 401 Unauthorized
     unless decoded_payload
-      return render json: { error: I18n.t('auth.errors.unauthorized_details') }, status: :unauthorized
+      return render json: { 
+        success: false, 
+        message: I18n.t('auth.errors.unauthorized_details'),
+        error_code: 'auth.invalid_token'
+      }, status: :unauthorized
     end
     
     # Lookup the token in the database for additional validation
@@ -33,7 +41,11 @@ class ApplicationController < ActionController::API
     
     # If token not found in database, return 401 Unauthorized
     unless auth_token
-      return render json: { error: I18n.t('auth.errors.unauthorized') }, status: :unauthorized
+      return render json: { 
+        success: false, 
+        message: I18n.t('auth.errors.unauthorized'),
+        error_code: 'auth.token_not_found'
+      }, status: :unauthorized
     end
     
     # Store decoded payload for controller use
@@ -48,6 +60,10 @@ class ApplicationController < ActionController::API
   private
   
   def render_error(exception)
-    render json: { error: exception.message }, status: :unprocessable_entity
+    render json: { 
+      success: false, 
+      message: exception.message,
+      error_code: 'system.unexpected_error'
+    }, status: :unprocessable_entity
   end
 end

@@ -37,7 +37,7 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
-                    example: '2025-05-05T21:24:29.480Z'
+                    example: '2025-05-07T03:45:00.000Z'
   /api/v1/tokens:
     post:
       summary: Generate JWT token
@@ -83,20 +83,19 @@ paths:
                   token:
                     type: string
                     description: JWT token to be used for authentication
-                    example: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidGVzdHVzZXIiLCJzY29wZSI6ImRlZmF1bHQiLCJjbGllbnRfaW5mbyI6Ik1vemlsbGEvNS4wIiwiaWF0IjoxNjE1MjM0MjY3LCJleHAiOjE2MTUzMjA2Njd9.pU8-XU4iNy9ZF4eG6TMUBK84xx2p-X3W
+                    example: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidGVzdHVzZXIiLCJzY29wZSI6ImRlZmF1bHQiLCJjbGllbnRfaW5mbyI6Ik1vemlsbGEvNS4wIiwiaWF0IjoxNzE0OTQzMDAwLCJleHAiOjE3MTUwMjk0MDB9.FZT9Y4m7_5N3RrWe6QS07Q-3X_2AjT3xtWryJ-Lqcko
         '401':
           description: Invalid credentials
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: Invalid credentials
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  value:
+                    success: false
+                    message: Invalid credentials
+                    error_code: auth.invalid_credentials
   /api/v1/blobs/{id}:
     get:
       summary: Retrieve a blob
@@ -122,7 +121,7 @@ paths:
                 properties:
                   id:
                     type: string
-                    example: my-unique-blob-id
+                    example: my-unique-blob-id5551221
                   data:
                     type: string
                     description: Base64-encoded content of the blob
@@ -130,27 +129,23 @@ paths:
                   size:
                     type: integer
                     description: Size of the blob in bytes
-                    example: 1024
+                    example: 44
                   created_at:
                     type: string
                     format: date-time
-                    example: '2025-05-06T00:00:00.000Z'
+                    example: '2025-05-07T00:39:54.829Z'
         '404':
           description: Blob not found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: Blob not found
-                  error_code:
-                    type: string
-                    example: storage.not_found
+                $ref: '#/components/schemas/Error'
+              examples:
+                not_found:
+                  value:
+                    success: false
+                    message: Blob not found
+                    error_code: blobs.not_found
   /api/v1/blobs:
     post:
       summary: Store a blob
@@ -185,36 +180,47 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
                     type: string
-                    example: my-unique-blob-id
-                  size:
-                    type: integer
-                    description: Size of the blob in bytes
-                    example: 1024
-                  created_at:
-                    type: string
-                    format: date-time
-                    example: '2025-05-06T00:00:00.000Z'
-                  storage_provider:
-                    type: string
-                    example: 's3'
+                    example: Blob created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: my-unique-blob-id23232
+                      data:
+                        type: [string, 'null']
+                        example: null
+                      size:
+                        type: integer
+                        description: Size of the blob in bytes
+                        example: 44
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-05-07T00:52:22.306Z'
         '422':
           description: Invalid parameters
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: Missing required parameters
-                  details:
-                    type: string
-                    example: Both blob_id and data are required
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_parameters:
+                  value:
+                    success: false
+                    message: Missing required parameters
+                    error_code: blobs.missing_parameters
+                    details: Both blob_id and data are required
+                already_exists:
+                  value:
+                    success: false
+                    message: A blob with this ID already exists. Please use a unique ID.
+                    error_code: blobs.already_exists
                   created_at:
                     type: string
                     format: date-time
@@ -227,21 +233,25 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: content must be base64 encoded
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalid_base64:
+                  value:
+                    success: false
+                    message: Content must be base64 encoded
+                    error_code: blobs.invalid_format
         '401':
           description: Unauthorized - invalid or missing token
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Authentication required
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  value:
+                    success: false
+                    message: Unauthorized
+                    error_code: auth.unauthorized
   /api/v1/blobs/{id}:
     get:
       summary: Retrieve a blob
@@ -266,44 +276,65 @@ paths:
               schema:
                 type: object
                 properties:
-                  blob_id:
+                  id:
                     type: string
-                    example: my-unique-blob-id
-                  size:
-                    type: integer
-                    example: 1024
-                  content:
+                    example: my-unique-blob-id5551221
+                  data:
                     type: string
                     description: Base64-encoded content
                     example: SGVsbG8sIHRoaXMgaXMgYSB0ZXN0IGZpbGUgZm9yIFNpbXBsZSBEcml2ZSE=
+                  size:
+                    type: integer
+                    example: 44
                   created_at:
                     type: string
                     format: date-time
-                    example: '2025-05-05T21:24:29.567Z'
-                  backend:
-                    type: string
-                    example: file
+                    example: '2025-05-07T00:39:54.829Z'
         '401':
           description: Unauthorized - invalid or missing token
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Authentication required
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  value:
+                    success: false
+                    message: Unauthorized
+                    error_code: auth.unauthorized
         '404':
           description: Blob not found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Blob not found
+                $ref: '#/components/schemas/Error'
+              examples:
+                not_found:
+                  value:
+                    success: false
+                    message: Blob not found
+                    error_code: blobs.not_found
 components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - success
+        - message
+        - error_code
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Human-readable error message
+        error_code:
+          type: string
+          description: Machine-readable error code
+        details:
+          type: string
+          description: Additional error details (optional)
   securitySchemes:
     bearerAuth:
       type: http
