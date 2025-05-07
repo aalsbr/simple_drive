@@ -293,10 +293,14 @@ HTTP/1.1 201 Created
 Content-Type: application/json
 
 {
-  "id": "my-unique-blob-id",
-  "size": 1024,
-  "created_at": "2025-05-06T00:00:00.000Z",
-  "storage_provider": "s3"
+  "success": true,
+  "message": "Blob created successfully",
+  "data": {
+    "id": "my-unique-blob-id23232",
+    "data": null,
+    "size": 44,
+    "created_at": "2025-05-07T00:52:22.306Z"
+  }
 }
 ```
 
